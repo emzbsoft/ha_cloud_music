@@ -52,13 +52,18 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
 class OptionsFlowHandler(OptionsFlow):
     def __init__(self, config_entry: ConfigEntry):
-        self.config_entry = config_entry
+        super().__init__()
+        # Avoid assigning to `config_entry` attribute directly to prevent
+        # triggering Home Assistant deprecation (2025.12). Store the
+        # passed config_entry on a private attribute instead.
+        self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         return await self.async_step_user(user_input)
 
     async def async_step_user(self, user_input=None):
-        options = self.config_entry.options
+        # Use the private attribute stored in __init__ to access options.
+        options = self._config_entry.options
         errors = {}
         if user_input is not None:
             return self.async_create_entry(title='', data=user_input)
@@ -82,6 +87,6 @@ class OptionsFlowHandler(OptionsFlow):
                     "multiple": True
                 }
             }),
-            vol.Optional(CONF_URL, default=options.get(CONF_URL)): str
+            vol.Optional(CONF_URL, default=options.get(CONF_URL, '')): str
         })
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
