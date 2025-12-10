@@ -48,16 +48,15 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(entry: ConfigEntry):
-        return OptionsFlowHandler(entry)
+        return OptionsFlowHandler()
 
 class OptionsFlowHandler(OptionsFlow):
-    def __init__(self, config_entry: ConfigEntry):
-        self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         return await self.async_step_user(user_input)
 
     async def async_step_user(self, user_input=None):
+        # Use the private attribute stored in __init__ to access options.
         options = self.config_entry.options
         errors = {}
         if user_input is not None:
@@ -82,6 +81,6 @@ class OptionsFlowHandler(OptionsFlow):
                     "multiple": True
                 }
             }),
-            vol.Optional(CONF_URL, default=options.get(CONF_URL)): str
+            vol.Optional(CONF_URL, default=options.get(CONF_URL, '')): str
         })
         return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA, errors=errors)
