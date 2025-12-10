@@ -48,22 +48,16 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(entry: ConfigEntry):
-        return OptionsFlowHandler(entry)
+        return OptionsFlowHandler()
 
 class OptionsFlowHandler(OptionsFlow):
-    def __init__(self, config_entry: ConfigEntry):
-        super().__init__()
-        # Avoid assigning to `config_entry` attribute directly to prevent
-        # triggering Home Assistant deprecation (2025.12). Store the
-        # passed config_entry on a private attribute instead.
-        self._config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         return await self.async_step_user(user_input)
 
     async def async_step_user(self, user_input=None):
         # Use the private attribute stored in __init__ to access options.
-        options = self._config_entry.options
+        options = self.config_entry.options
         errors = {}
         if user_input is not None:
             return self.async_create_entry(title='', data=user_input)
